@@ -9,7 +9,12 @@ import { CASINO_ABI, CASINO_ADDRESS } from './config.js';
 
 export default class App extends React.Component {
   
-
+  constructor(props) { 
+    super(props);
+    this.state = { 
+      didWin: null,
+    };
+  }
   componentWillMount() { 
     this.loadBlockchainData();
   }
@@ -24,14 +29,13 @@ export default class App extends React.Component {
     const casino = new window.web3.eth.Contract(CASINO_ABI, CASINO_ADDRESS);
     // const accounts = await web3.eth.getAccounts();
     // console.log(accounts[6]);
-    this.setState({ casino: casino, account: accounts[0] });
+    
     //casino.methods.takeBet().send({value: window.web3.utils.toWei('5', 'ether'), from: accounts[0]});
-    this.state.casino.events.BetProcessed()
-      .on("data", (event) => { 
-        const asdf = event.returnValues;
-        console.log(asdf._didWin);
-      })
+    casino.events.BetProcessed()
+      .on("data", this.handleBetProcessed)
       .on("error", console.error);
+
+      this.setState({ casino: casino, account: accounts[0] });
     
   }
   makeBet() { 
@@ -40,12 +44,20 @@ export default class App extends React.Component {
 
   handleClick = () => this.makeBet();
 
- 
+  handleBetProcessed = event => { 
+    const returnValues = event.returnValues;
+    console.log(returnValues._didWin);
+    this.setState({ didWin: returnValues._didWin});
+  }
+  didWinToFace = () => { 
+    if(this.state.didWin === null) return ':|';
+    return this.state.didWin ? ':)' : ':(';
+  }
   render () {
     return (
     <div className="App">
       <header className="App-header">
-        <Button onClick={this.handleClick}/>
+        <Button onClick={this.handleClick} didWin={this.didWinToFace()}/>
       </header>
     </div>
     );

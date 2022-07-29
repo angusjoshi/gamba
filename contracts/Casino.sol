@@ -1,25 +1,30 @@
+// SPDX-License-Identifier: MIT
 pragma solidity >=0.8.0 <0.9.0;
+import "./GambaCoin.sol";
 
 contract Casino {
-
-    mapping(uint => string) test;
-    uint randNonce = 0;
+    uint private randNonce = 0;
     uint public balance = 0;
+    GambaCoin public gambaCoin;
     address owner;
     event BetProcessed(address indexed _better, bool _didWin, uint _value);
 
-    constructor() {
+    constructor(address _gambaCoinAddress) {
         owner = msg.sender;
+        gambaCoin = GambaCoin(_gambaCoinAddress);
     }
 
-    function takeBet() public payable { 
-        balance += msg.value;
+    function takeBet(uint _betSize) public { 
+        require(gambaCoin.balanceOf(msg.sender) >= _betSize, "better doesn't have enough GambaCoin!");
+
+        gambaCoin.receiveBet(msg.sender, _betSize);
         bool _didWin = false;
         if(randMod(20) > 10) { 
-            payable(msg.sender).transfer(msg.value * 2);
+            // payable(msg.sender).transfer(msg.value * 2);
+            gambaCoin._payout(msg.sender, _betSize * 2);
             _didWin = true;
         }
-        emit BetProcessed(msg.sender, _didWin, msg.value);
+        emit BetProcessed(msg.sender, _didWin, _betSize);
     }
 
     receive() external payable { 
@@ -34,14 +39,6 @@ contract Casino {
         payable(owner).transfer(_amount);
     }
 
-
-    function setTest(uint _key, string memory _value) public { 
-        test[_key] = _value;
-    }
-
-    function getTest(uint _id) public view returns(string memory) { 
-        return test[_id];
-    }
 
     function randMod(uint _modulus) internal returns(uint) {
         randNonce++;

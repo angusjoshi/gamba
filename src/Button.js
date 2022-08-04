@@ -7,7 +7,7 @@ export default class Button extends React.Component {
     render() { 
         return(
             <button className="gamba-button" onClick={this.props.onClick}>
-                <p>{this.props.didWin}</p>
+                <p>{this.props.text}</p>
             </button>
         );
     }

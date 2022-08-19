@@ -1,4 +1,4 @@
-export const CASINO_ADDRESS = '0xa404b6CEc352F4dcf21D0C5a821a6529833CFB77';
+export const CASINO_ADDRESS = '0x6fae94E8627C2782f038d322f12ee5eA254c47Dc';
 
 export const CASINO_ABI = [
   {
